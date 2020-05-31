@@ -10,11 +10,14 @@ import random
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+import time
+
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='!')
+swearEnabled = True
 
 #Swear List
 swearList = ['ass','bitch','cbt','cunt',
@@ -48,6 +51,8 @@ def gatherTotal(user):
     return total
 
 def gatherAdvancedData(user):
+    if user is None:
+        return "Please input user id, !d test#1234"
     if user in swearDict:
         details = "User: {}\nTotal: {}\n".format(user,gatherTotal(user))
         for i in range(len(swearList)):
@@ -89,24 +94,39 @@ def getTotalOfWord(user,word):
         return -1
 
 def swearCountMultiple(user, message):
+    swear = False
     for word in swearList:
         if word in message:
-            swearCount(user,word)
+            if(swear):
+                swearCount(user,word)
+            else:
+                swear = swearCount(user,word)
+    return swear
+
+def toggle():
+    global swearEnabled 
+    swearEnabled = not swearEnabled
+    return "Swearing Set: " + swearEnabled
 
 swearDict = loadData()
 print(swearDict)
 
 ## Commands ##
 
-@bot.command(name='Total', help='!Total - Gives current swear count of all users')
+@bot.command(name='t', help='!t - toggles swear removal')
+@commands.has_role('admin')
+async def toggleSwearEnable(ctx):
+    await ctx.send(toggle())
+
+@bot.command(name='ut', help='!ut - Gives current swear count of all users')
 async def total(ctx):
     await ctx.send(getAllTotals())
 
-@bot.command(name='D', help='!D Test#1234 - Gives detailed account of words for a specific user')
+@bot.command(name='d', help='!d Test#1234 - Gives detailed account of words for a specific user')
 async def details(ctx, name):
     await ctx.send(gatherAdvancedData(str(name)))
 
-@bot.command(name='Me', help='!Me - Gives detailed account of words for you')
+@bot.command(name='me', help='!me - Gives detailed account of words for you')
 async def userTotal(ctx):
     await ctx.send(gatherAdvancedData(str(ctx.author)))
 
@@ -122,15 +142,25 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    swearCountMultiple(str(message.author), str(message.content.lower()))
+    global swearEnabled
+    if swearCountMultiple(str(message.author), str(message.content.lower())):
+        if(swearEnabled):
+            await message.channel.send("{}, your message has been censored.".format(message.author.mention))
+            await message.delete()
+
     await bot.process_commands(message)
 
 @bot.event
 async def on_error(event, *args, **kwargs):
     with open('err.log', 'a') as f:
         if event == 'on_message':
-            f.write(f'Unhandled message: {args[0]}\n')
+            f.write(f'{time.strftime("%H:%M:%S", time.localtime())}- Unhandled message: {args[0]}\n')
         else:
             raise
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.errors.CheckFailure):
+        await ctx.send('You do not have the correct role for this command.')
 
 bot.run(TOKEN)
