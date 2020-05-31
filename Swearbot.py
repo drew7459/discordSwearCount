@@ -12,7 +12,6 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import time
 
-
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -106,7 +105,7 @@ def swearCountMultiple(user, message):
 def toggle():
     global swearEnabled 
     swearEnabled = not swearEnabled
-    return "Swearing Set: " + swearEnabled
+    return swearEnabled
 
 swearDict = loadData()
 print(swearDict)
@@ -134,6 +133,9 @@ async def userTotal(ctx):
 async def mung(ctx):
     await ctx.send("mung")
 
+@bot.command(name='c', help='!c - counts')
+async def mung(ctx):
+    await ctx.send()
 ## Events ##
 
 @bot.event
