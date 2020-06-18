@@ -27,12 +27,14 @@ python SwearBot.py
 Inside discord you can type specific commands in chat to check for user data as well as have the bot passively gather data on the profanity usage inside the server.
 >##### **Commands List:**
 >
-> - !help - Provides a list of commands that can be used
-> - !Total - Displays total swear count of all users
-> - !D user#1234- Gives detailed account of words used by specified user (include identification number)
-> - !Me - Shows detailed account of words used from caller
+> - !t - Toggles swear removal on the server, only can be toggled by an admin
+> - !ut - Displayed current swear count for all users who have sweared on the server
+> - !d user#1234- Gives detailed account of words used by specified user (include identification number)
+> - !me - Shows detailed account of words used from caller
 > - !m - Bot sends back the word "mung" in chat 
-
+> - !c - Just adds an unspecified swear to the total counter
+> - !help - Provides a list of commands that can be used
+>
 >##### **Passive logging from discord bot:**
 >
 > - on_message - Views message and updates swear word account from user
